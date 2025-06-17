@@ -1,7 +1,0 @@
-DLWMLS
-huggingface_hub
-pandas
-scipy
-nibabel
-argparse
-pathlib

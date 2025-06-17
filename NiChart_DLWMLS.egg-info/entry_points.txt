@@ -1,2 +1,0 @@
-[console_scripts]
-NiChart_DLWMLS = NiChart_DLWMLS.__main__:main
