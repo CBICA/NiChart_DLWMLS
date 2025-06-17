@@ -1,0 +1,41 @@
+Metadata-Version: 2.4
+Name: NiChart_DLWMLS
+Version: 0.0.1
+Summary: Run Deep-Learning-based-White-Matter-Lesion-Segmentation on your data (requires FLAIR, optional T1 masks for granular segmentation).
+Home-page: https://github.com/CBICA/NiChart_DLWMLS
+Author: Kyunglok Baik
+Author-email: software@cbica.upenn.edu
+Maintainer: Kyunglok Baik, Alexander Getka
+License: By installing/using NiChart_DLWMLS, the user agrees to the following license: See https://www.med.upenn.edu/cbica/software-agreement-non-commercial.html
+Keywords: deep learning,image segmentation,semantic segmentation,medical image analysis,medical image segmentation,nnU-Net,nnunet
+Classifier: Intended Audience :: Science/Research
+Classifier: Programming Language :: Python
+Classifier: Topic :: Scientific/Engineering
+Classifier: Operating System :: Unix
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: DLWMLS
+Requires-Dist: huggingface_hub
+Requires-Dist: pandas
+Requires-Dist: scipy
+Requires-Dist: nibabel
+Requires-Dist: argparse
+Requires-Dist: pathlib
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: home-page
+Dynamic: keywords
+Dynamic: license
+Dynamic: license-file
+Dynamic: maintainer
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
+
+# NiChart_DLWMLS
+
+Run Deep-Learning-based-White-Matter-Lesion-Segmentation on your data (requires FLAIR, optional T1 masks for granular segmentation).
