@@ -184,8 +184,8 @@ def main() -> None:
     # Check if the folder exists
     
     run_DLWMLS(in_dir=fl_path, 
-               in_suff='_FL_LPS.nii.gz', 
-               out_suff='_DLWMLS.nii.gz', 
+               in_suff=fl_image_suffix, 
+               out_suff=dlwmls_suffix, 
                out_dir=dlwmls_path,device='cuda')
 
     

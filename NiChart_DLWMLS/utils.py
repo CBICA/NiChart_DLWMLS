@@ -81,7 +81,7 @@ def reorient_to_lps(input_path: str, output_path: str):
 def run_DLWMLS(in_dir: str,
                in_suff: Any,
                out_dir: str,
-               out_suff: Any,
+               out_suff: str,
                device: str,
                extra_args: str = "",) -> None:
     if not os.path.exists(out_dir):
