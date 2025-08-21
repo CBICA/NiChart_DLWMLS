@@ -42,7 +42,7 @@ def reorient_to_lps(input_path: str, output_path: str):
     if original_orientation == target_orientation:
         logging.info("Image is already in the target LPS orientation. No changes needed.")
         # If you still want to save a copy, uncomment the line below
-        # nib.save(img, output_path)
+        nib.save(img, output_path)
         return
 
     # Determine the transformation needed to go from original to target orientation
@@ -79,20 +79,19 @@ def reorient_to_lps(input_path: str, output_path: str):
     #     print("Warning: Reorientation may not have been successful.")
 
 def run_DLWMLS(in_dir: str,
-               in_suff: Any,
+            #    in_suff: Any,
                out_dir: str,
-               out_suff: str,
+            #    out_suff: str,
                device: str,
                extra_args: str = "",) -> None:
     if not os.path.exists(out_dir):
         os.mkdir(out_dir)
+    os.system(f"DLWMLS -i {in_dir} -o {out_dir} -device {device} " + extra_args)
     
-    os.system(f"DLWMLS -i {in_dir} -o {out_dir} -os {out_suff} -device {device} " + extra_args)
-    
-    for fname in glob.glob(os.path.join(out_dir, "DLMUSE_mask_*.nii.gz")):
-        new_fname = fname.replace("DLMUSE_mask_", "", 1).replace(in_suff, out_suff)
-        # os.rename(fname, new_fname)
-        shutil.copyfile(fname, new_fname)
+    # for fname in glob.glob(os.path.join(out_dir, "DLMUSE_mask_*.nii.gz")):
+    #     new_fname = fname.replace("DLMUSE_mask_", "", 1).replace(in_suff, out_suff)
+    #     # os.rename(fname, new_fname)
+    #     shutil.copyfile(fname, new_fname)
 
 def register_flair_to_t1(t1_image_path='', 
                          flair_image_path='', 
