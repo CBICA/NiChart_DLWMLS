@@ -87,7 +87,7 @@ def run_DLWMLS(in_dir: str,
     if not os.path.exists(out_dir):
         os.mkdir(out_dir)
     
-    os.system(f"DLWMLS -i {in_dir} -o {out_dir} -device {device} " + extra_args)
+    os.system(f"DLWMLS -i {in_dir} -o {out_dir} -os {out_suff} -device {device} " + extra_args)
     
     for fname in glob.glob(os.path.join(out_dir, "DLMUSE_mask_*.nii.gz")):
         new_fname = fname.replace("DLMUSE_mask_", "", 1).replace(in_suff, out_suff)
