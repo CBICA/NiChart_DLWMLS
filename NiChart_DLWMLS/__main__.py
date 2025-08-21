@@ -136,12 +136,16 @@ def main() -> None:
     dlmuse_directory = args.dlmuse_dir
     dlmuse_suffix = args.dlmuse_suff
 
-    dlwmls_suffix = '_FL_LPS_WMLS.nii.gz'
+    dlwmls_suffix = '_FL_LPS_DLWMLS.nii.gz'
     fl_to_t1_xfm_suffix = '_FL_to_T1.tfm'
     dlwmls_to_t1_reg_suffix = '_DLWMLS_REG_to_T1.nii.gz'
     dlwmls_dlmuse_segmented_suffix = "_DLWMLS_DLMUSE_Segmented.nii.gz"
     dlwmls_roi_volume_csv_suffix = '_DLWMLS_DLMUSE_Segmented_Volumes.csv'
     
+    if not os.path.exists(output_directory):
+        logging.warning(f"Output folder '{output_directory}' not found. Creating '{output_directory}'")
+        os.mkdir(output_directory)
+        
     dlwmls_path = os.path.join(output_directory, 'DLWMLS')
     if os.path.exists(dlwmls_path):
         shutil.rmtree(dlwmls_path) # Remove the directory and its contents
