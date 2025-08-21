@@ -32,6 +32,7 @@ def main() -> None:
         [--dlmuse_suff] Suffix of the input T1 scans (OPTIONAL, DEFAULT: _T1_LPS_DLMUSE.nii.gz)
     
     Optional arguments:
+        [-r, --remove_intermediate]  Remove all intermediate files. (DEFAULT: True)
         [-d, --device]  Device to run segmentation ('cuda' (GPU), 'cpu' (CPU) or 
                         'mps' (Apple M-series chips supporting 3D CNN))
         [-h, --help]    Show this help message and exit.
@@ -50,6 +51,7 @@ def main() -> None:
                         --dlmuse_dir    /path/to/dlmuse_masks  \
                         --dlmuse_suff   _T1_LPS_DLMUSE.nii.gz  \
                         --out_dir       /path/to/output        \
+                        --remove_intermediate True             \
                         --device cpu/cuda
     """.format(
         VERSION=VERSION
@@ -71,7 +73,7 @@ def main() -> None:
     
     parser.add_argument('--dlmuse_dir', required=True, type=str, default=None, help='Name of the input folder with DLMUSE masks (OPTIONAL)')
     parser.add_argument('--dlmuse_suff', type=str, default='_T1_LPS_DLMUSE.nii.gz', help='Suffix of the input DLMUSE masks (OPTIONAL, DEFAULT: _T1_LPS_DLMUSE.nii.gz)')
-    
+    parser.add_argument('-r', '--remove_intermediate', type=str, default='True', help="Remove all intermediate files (Default: True)")
     parser.add_argument('-d', '--device', type=str, default="cuda", help="Device to run segmentation ('cuda' (GPU), 'cpu' (CPU) or 'mps' (Apple M-series chips supporting 3D CNN))")
     
     parser.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS, help='Show this help message and exit.')
@@ -101,6 +103,9 @@ def main() -> None:
     dlwmls_to_t1_reg_suffix = '_DLWMLS_REG_to_T1.nii.gz'
     dlwmls_dlmuse_segmented_suffix = "_DLWMLS_DLMUSE_Segmented.nii.gz"
     dlwmls_roi_volume_csv_suffix = '_DLWMLS_DLMUSE_Segmented_Volumes.csv'
+
+    # Other args
+    remove_intermediate = args.remove_intermediate.lower() == 'true'
     
     if not os.path.exists(output_directory):
         logging.warning(f"Output folder '{output_directory}' not found. Creating '{output_directory}'")
@@ -167,6 +172,12 @@ def main() -> None:
                                                       save_as_csv=True,
                                                       csv_path=os.path.join(output_directory, mrid + dlwmls_roi_volume_csv_suffix),
                                                       mrid = mrid)
+    if remove_intermediate:
+        shutil.rmtree(flair_lps_path)
+        shutil.rmtree(t1_lps_path)
+        shutil.rmtree(dlwmls_path)
+        shutil.rmtree(tfm_path)
+        shutil.rmtree(dlwmls_tfmed)
 
 if __name__ == "__main__":
     #print("Please use CMD to run NiChart_DLWMLS or NiChart_DLWMLS_essential.")
