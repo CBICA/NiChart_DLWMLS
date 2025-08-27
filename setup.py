@@ -7,7 +7,7 @@ long_description = (this_directory / "README.md").read_text()
 
 setup(
     name="NiChart_DLWMLS",
-    version="0.0.1",
+    version="0.1.0",
     description="Run Deep-Learning-based-White-Matter-Lesion-Segmentation on your data (requires FLAIR, optional T1 masks for granular segmentation).",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -18,7 +18,7 @@ setup(
     url="https://github.com/CBICA/NiChart_DLWMLS",
     python_requires=">=3.9",
     install_requires=[
-        "DLWMLS",
+        "DLWMLS >= 0.1.0",
         "huggingface_hub",
         "pandas",
         "scipy",
