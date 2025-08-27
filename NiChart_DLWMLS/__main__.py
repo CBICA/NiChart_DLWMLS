@@ -149,29 +149,31 @@ def main() -> None:
     # Check if the folder exists
     
     run_DLWMLS(in_dir=flair_lps_path, 
-               #in_suff=fl_image_suffix, 
                out_dir=dlwmls_path,
-               #out_suff=dlwmls_suffix, 
                device=args.device)
 
     
     logging.info(f"Creating transformation matrix from FL to T1, applying to the DLWMLS Masks")
     for mrid in mrids:
-        register_flair_to_t1(t1_image_path=os.path.join(t1_lps_path, mrid + t1_image_suffix),
-                             flair_image_path=os.path.join(flair_lps_path, mrid + fl_image_suffix),
-                             output_path=os.path.join(tfm_path, mrid+fl_to_t1_xfm_suffix))
-        
-        apply_saved_transform(fixed_image_path=os.path.join(t1_lps_path, mrid + t1_image_suffix),
-                              moving_image_path=os.path.join(dlwmls_path, mrid + dlwmls_suffix),
-                              transform_path=os.path.join(tfm_path, mrid + fl_to_t1_xfm_suffix),
-                              output_image_path=os.path.join(dlwmls_tfmed, mrid + dlwmls_to_t1_reg_suffix))
-        
-        segment_multilabel_mask_and_calculate_volumes(mask_a_path=os.path.join(dlwmls_tfmed, mrid + dlwmls_to_t1_reg_suffix),
-                                                      mask_b_path=os.path.join(dlmuse_directory, mrid + dlmuse_suffix),
-                                                      output_path=os.path.join(dlwmls_dlmuse_segmented_path, mrid + dlwmls_dlmuse_segmented_suffix),
-                                                      save_as_csv=True,
-                                                      csv_path=os.path.join(output_directory, mrid + dlwmls_roi_volume_csv_suffix),
-                                                      mrid = mrid)
+        try:
+            register_flair_to_t1(t1_image_path=os.path.join(t1_lps_path, mrid + t1_image_suffix),
+                                flair_image_path=os.path.join(flair_lps_path, mrid + fl_image_suffix),
+                                output_path=os.path.join(tfm_path, mrid+fl_to_t1_xfm_suffix))
+            
+            apply_saved_transform(fixed_image_path=os.path.join(t1_lps_path, mrid + t1_image_suffix),
+                                moving_image_path=os.path.join(dlwmls_path, mrid + dlwmls_suffix),
+                                transform_path=os.path.join(tfm_path, mrid + fl_to_t1_xfm_suffix),
+                                output_image_path=os.path.join(dlwmls_tfmed, mrid + dlwmls_to_t1_reg_suffix))
+            
+            segment_multilabel_mask_and_calculate_volumes(mask_a_path=os.path.join(dlwmls_tfmed, mrid + dlwmls_to_t1_reg_suffix),
+                                                        mask_b_path=os.path.join(dlmuse_directory, mrid + dlmuse_suffix),
+                                                        output_path=os.path.join(dlwmls_dlmuse_segmented_path, mrid + dlwmls_dlmuse_segmented_suffix),
+                                                        save_as_csv=True,
+                                                        csv_path=os.path.join(output_directory, mrid + dlwmls_roi_volume_csv_suffix),
+                                                        mrid = mrid)
+        except Exception as e:
+            print(f"{mrid} excluded due to {e}")
+
     if remove_intermediate:
         shutil.rmtree(flair_lps_path)
         shutil.rmtree(t1_lps_path)
