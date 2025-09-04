@@ -158,11 +158,11 @@ def main() -> None:
     logging.info(f"Creating transformation matrix from FL to T1, applying to the DLWMLS Masks")
     for mrid in mrids:
         try:
-            register_flair_to_t1(t1_image_path=os.path.join(t1_lps_path, mrid + t1_image_suffix),
-                                flair_image_path=os.path.join(flair_lps_path, mrid + fl_image_suffix),
+            register_flair_to_t1(t1_image_path=os.path.join(t1_lps_path, mrid + t1_lps_suffix),
+                                flair_image_path=os.path.join(flair_lps_path, mrid + fl_lps_suffix),
                                 output_path=os.path.join(tfm_path, mrid+fl_to_t1_xfm_suffix))
             
-            apply_saved_transform(fixed_image_path=os.path.join(t1_lps_path, mrid + t1_image_suffix),
+            apply_saved_transform(fixed_image_path=os.path.join(t1_lps_path, mrid + t1_lps_suffix),
                                 moving_image_path=os.path.join(dlwmls_path, mrid + dlwmls_suffix),
                                 transform_path=os.path.join(tfm_path, mrid + fl_to_t1_xfm_suffix),
                                 output_image_path=os.path.join(dlwmls_tfmed, mrid + dlwmls_to_t1_reg_suffix))
