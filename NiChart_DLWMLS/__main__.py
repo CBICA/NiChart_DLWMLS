@@ -98,6 +98,8 @@ def main() -> None:
     dlmuse_directory = args.dlmuse_dir
     dlmuse_suffix = args.dlmuse_suff
     # Suffixes for intermediate files
+    t1_lps_suffix = '_T1_LPS.nii.gz'
+    fl_lps_suffix = '_FL_LPS.nii.gz'
     dlwmls_suffix = '_FL_LPS_DLWMLS.nii.gz'
     fl_to_t1_xfm_suffix = '_FL_to_T1.tfm'
     dlwmls_to_t1_reg_suffix = '_DLWMLS_REG_to_T1.nii.gz'
@@ -140,10 +142,10 @@ def main() -> None:
     for mrid in mrids:
         # Reorient T1
         reorient_to_lps(input_path=os.path.join(t1_path, mrid + t1_image_suffix),
-                        output_path=os.path.join(t1_lps_path, mrid + t1_image_suffix))
+                        output_path=os.path.join(t1_lps_path, mrid + t1_lps_suffix))
         # Reorient FLAIR
         reorient_to_lps(input_path=os.path.join(fl_path, mrid + fl_image_suffix),
-                        output_path=os.path.join(flair_lps_path, mrid + fl_image_suffix))
+                        output_path=os.path.join(flair_lps_path, mrid + fl_lps_suffix))
         
     logging.info(f"Processing DLWMLS on FLAIR folder")
     # Check if the folder exists
