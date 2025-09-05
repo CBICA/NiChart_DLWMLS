@@ -79,11 +79,10 @@ def reorient_to_lps(input_path: str, output_path: str):
     #     print("Warning: Reorientation may not have been successful.")
 
 def run_DLWMLS(in_dir: str,
-            #    in_suff: Any,
                out_dir: str,
-            #    out_suff: str,
                device: str,
                extra_args: str = "",) -> None:
+    
     if not os.path.exists(out_dir):
         os.mkdir(out_dir)
     os.system(f"DLWMLS -i {in_dir} -o {out_dir} -device {device} " + extra_args)
@@ -298,6 +297,7 @@ def segment_multilabel_mask_and_calculate_volumes(mask_a_path: str,
     # Calculate voxel volume once
     voxel_volume = np.abs(np.linalg.det(img_a.affine[:3, :3]))
 
+    volume_results['702'] = voxel_volume * np.sum(data_a & (data_b != 0))
     # --- Iterate over each label, perform segmentation, and calculate volume ---
     for label in labels_in_b:
         # Create a temporary binary mask for the current label
@@ -336,6 +336,7 @@ def segment_multilabel_mask_and_calculate_volumes(mask_a_path: str,
     # --- Save the Resulting Multi-Label Mask Volumes as CSV ---
     if save_as_csv:
         df_csv = pd.DataFrame(volume_results, index=[mrid])
-        df_csv.to_csv(csv_path)
+        df_csv.insert(loc=0, column="MRID", value=[mrid])
+        df_csv.to_csv(csv_path,index=False)
 
     logging.info("\nProcess finished successfully.")

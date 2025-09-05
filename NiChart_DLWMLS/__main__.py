@@ -140,12 +140,15 @@ def main() -> None:
 
     logging.info(f"LPS Orienting and saving the images")
     for mrid in mrids:
-        # Reorient T1
-        reorient_to_lps(input_path=os.path.join(t1_path, mrid + t1_image_suffix),
-                        output_path=os.path.join(t1_lps_path, mrid + t1_lps_suffix))
-        # Reorient FLAIR
-        reorient_to_lps(input_path=os.path.join(fl_path, mrid + fl_image_suffix),
-                        output_path=os.path.join(flair_lps_path, mrid + fl_lps_suffix))
+        try:
+            # Reorient T1
+            reorient_to_lps(input_path=os.path.join(t1_path, mrid + t1_image_suffix),
+                            output_path=os.path.join(t1_lps_path, mrid + t1_lps_suffix))
+            # Reorient FLAIR
+            reorient_to_lps(input_path=os.path.join(fl_path, mrid + fl_image_suffix),
+                            output_path=os.path.join(flair_lps_path, mrid + fl_lps_suffix))
+        except Exception as e:
+            print(f"{mrid} excluded due to {e}")
         
     logging.info(f"Processing DLWMLS on FLAIR folder")
     # Check if the folder exists
