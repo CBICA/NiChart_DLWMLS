@@ -32,6 +32,12 @@ pip install -e .
 
 ## Usage
 
+### Prerequisits:
+- T1 image (.nii.gz)
+- FL image (.nii.gz)
+- DLMUSE mask (.nii.gz) (refer to: [NiChart_DLMUSE](https://github.com/CBICA/NiChart_DLMUSE))
+- (*optional) your own WMH mask (.nii.gz)
+
 #### Required arguments:
 
     [-fl, --fl_dir] : Name of the input folder with FL scans  (REQUIRED)
@@ -51,7 +57,8 @@ pip install -e .
     
 #### EXAMPLE USAGE:
 
-    
+    Executing the full pipeline including seperating WMLS mask into Brain ROI level 
+        based on the input DLMUSE masks:
 
     NiChart_DLWMLS  --list          /path/to/mrid_list.csv \
                     --fl_dir        /path/to/flair_images  \
@@ -62,3 +69,18 @@ pip install -e .
                     --dlmuse_suff   _T1_LPS_DLMUSE.nii.gz  \
                     --out_dir       /path/to/output
 
+
+    Using your own WMH masks (skipping DLWMLS segmentation):
+
+        NiChart_DLWMLS  --list          /path/to/mrid_list.csv \
+                        --fl_dir        /path/to/flair_images  \
+                        --fl_suff       _FL.nii.gz             \
+                        --wmh_dir       /path/to/dlwmls_masks  \
+                        --wmh_suff      _FL_LPS_DLWMLS.nii.gz  \
+                        --t1_dir        /path/to/t1_images     \
+                        --t1_suff       _T1.nii.gz             \
+                        --dlmuse_dir    /path/to/dlmuse_masks  \
+                        --dlmuse_suff   _T1_LPS_DLMUSE.nii.gz  \
+                        --out_dir       /path/to/output        \
+                        --remove_intermediate True             \
+                        --device cpu/cuda
