@@ -25,9 +25,13 @@ setup(
         "nibabel",
         "argparse",
         "pathlib",
+		"matplotlib",
+		"pillow",
+		"tqdm",
+		"nibabel",
+		"einops",
+		"segmentation-models-pytorch==0.3.2"
     ],
-    # entry_points={"console_scripts": ["NiChart_DLWMLS = NiChart_DLWMLS.__main__:run_full",
-    #                                   "NiChart_DLWMLS_essential = NiChart_DLWMLS.__main__.run_essential"]},
     entry_points={"console_scripts": ["NiChart_DLWMLS = NiChart_DLWMLS.__main__:main"]},
     classifiers=[
         "Intended Audience :: Science/Research",
@@ -45,6 +49,7 @@ setup(
         "medical image segmentation",
         "nnU-Net",
         "nnunet",
+		"wmh_seg"
     ],
     package_data={
         "NiChart_DLWMLS": ["**/*.csv", "**/*.json"],

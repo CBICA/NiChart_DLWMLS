@@ -6,11 +6,21 @@ Executing the full pipeline including seperating WMLS mask into Brain ROI level 
 
 ## Installation
 
+#### 0. Create a conda env (Python >= 3.9)
+
 #### 1. Install DLWMLS (Required dependency)
 ```bash
 git clone https://github.com/CBICA/DLWMLS.git
 cd DLWMLS
 pip install -e .
+```
+
+### 1. Install wmh_seg (Optional) 
+```bash
+git clone https://github.com/euroso97/wmh_seg.git
+cd wmh_seg
+wget https://huggingface.co/jil202/wmh_seg/resolve/main/ChallengeMatched_Unet_mit_b5.pth
+
 ```
 
 #### 2. Install NiChart_DLWMLS

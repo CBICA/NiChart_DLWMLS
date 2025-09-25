@@ -12,26 +12,33 @@ from .utils import (
     segment_multilabel_mask_and_calculate_volumes
 )
 
-VERSION = "0.0.1"
+VERSION = "0.1.0"
 
 
 def main() -> None:
     prog = "NiChart_DLWMLS"
-    description = "NiCHART White Matter Lesion Segmentation Pipeline"
+    description = "NiCHART White Matter Hyperintensity Segmentation Pipeline (Brain ROI level)"
     usage = """
     NiChart_DLWMLS v{VERSION}
-    Run WML Segmentation and secondary segementation using DLMUSE masks
+    Run WMH Segmentation and secondary segementation using ROI masks.
+    Optionally, use your own WMH mask to segment it into ROI level.
 
     Required arguments:
-        [-fl, --fl_dir] : Name of the input folder with FL scans  (REQUIRED)
-        [-o, --out_dir] : Name of the output folder for segmentation (REQUIRED)
-        [--list]        List of MRIDs; first raw (column header) skipped (OPTIONAL)
-        [--t1_dir]      Name of the input folder with T1 scans  (OPTIONAL)
-        [--t1_suff]     Suffix of the input T1 scans (OPTIONAL, DEFAULT: _T1.nii.gz)
-        [--dlmuse_dir]  Name of the input folder with T1 scans  (OPTIONAL)
-        [--dlmuse_suff] Suffix of the input T1 scans (OPTIONAL, DEFAULT: _T1_LPS_DLMUSE.nii.gz)
+        [--list]        List of MRIDs with a single column name MRID 
+                        (Your files must be named MRID + Suffix)
+        [-fl, --fl_dir] Name of the input folder with FL scans
+        [--fl_suff]     Suffix of the input FLAIR scans (DEFAULT: _FL.nii.gz)
+        [--t1_dir]      Name of the input folder with T1 scans
+        [--t1_suff]     Suffix of the input T1 scans (DEFAULT: _T1.nii.gz)
+        [--dlmuse_dir]  Name of the input folder with DLMUSE masks
+        [--dlmuse_suff] Suffix of the input DLMUSE masks (DEFAULT: _T1_LPS_DLMUSE.nii.gz)
+        [-o, --out_dir] Name of the output folder for segmentation outputs
     
     Optional arguments:
+        [--wmh_dir]  Name of the input folder with White Matter Hyperintensity masks
+                        The masks should match the orientation & dimension of the input FL images.
+                        Entering this will bypass the initial WMH segmentation step.
+        [--wmh_suff] Suffix of the input White Matter Hyperintensity masks (DEFAULT: _FL_LPS_DLWMLS.nii.gz)
         [-r, --remove_intermediate]  Remove all intermediate files. (DEFAULT: True)
         [-d, --device]  Device to run segmentation ('cuda' (GPU), 'cpu' (CPU) or 
                         'mps' (Apple M-series chips supporting 3D CNN))
@@ -41,11 +48,26 @@ def main() -> None:
     EXAMPLE USAGE:
 
         Executing the full pipeline including seperating WMLS mask into Brain ROI level 
-            based on the input DLMUSE masks
+            based on the input DLMUSE masks:
 
         NiChart_DLWMLS  --list          /path/to/mrid_list.csv \
                         --fl_dir        /path/to/flair_images  \
                         --fl_suff       _FL.nii.gz             \
+                        --t1_dir        /path/to/t1_images     \
+                        --t1_suff       _T1.nii.gz             \
+                        --dlmuse_dir    /path/to/dlmuse_masks  \
+                        --dlmuse_suff   _T1_LPS_DLMUSE.nii.gz  \
+                        --out_dir       /path/to/output        \
+                        --remove_intermediate True             \
+                        --device cpu/cuda
+
+        Using your own WMH masks (skipping DLWMLS segmentation):
+
+        NiChart_DLWMLS  --list          /path/to/mrid_list.csv \
+                        --fl_dir        /path/to/flair_images  \
+                        --fl_suff       _FL.nii.gz             \
+                        --wmh_dir       /path/to/dlwmls_masks  \
+                        --wmh_suff      _FL_LPS_DLWMLS.nii.gz  \
                         --t1_dir        /path/to/t1_images     \
                         --t1_suff       _T1.nii.gz             \
                         --dlmuse_dir    /path/to/dlmuse_masks  \
@@ -61,24 +83,28 @@ def main() -> None:
         prog=prog, usage=usage, description=description, add_help=False
     )
 
-    parser.add_argument('--fl_dir', required=True, type=str, help='Name of the input folder with FL scans (REQUIRED)')
-    parser.add_argument('--fl_suff', type=str, default='_FL.nii.gz', help='Suffix of the input FLAIR scans (OPTIONAL, DEFAULT: _FL.nii.gz)')
+    parser.add_argument('--list', type=str, default=None)
+
+    parser.add_argument('--fl_dir', required=True, type=str)
+    parser.add_argument('--fl_suff', type=str, default='_FL.nii.gz') 
     
-    parser.add_argument('--out_dir', required=True, type=str, help='Name of the output folder for segmentation (REQUIRED)')
+    parser.add_argument('--t1_dir', required=True, type=str, default=None)
+    parser.add_argument('--t1_suff', type=str, default='_T1.nii.gz')
     
-    parser.add_argument('--list', type=str, default=None, help='List of MRIDs; first row (column header) skipped (OPTIONAL)')
+    parser.add_argument('--wmh_dir', type=str, default='') # Optional
+    parser.add_argument('--wmh_suff', type=str, default='_FL_LPS_DLMUSE.nii.gz')
+
+    parser.add_argument('--dlmuse_dir', required=True, type=str, default=None)
+    parser.add_argument('--dlmuse_suff', type=str, default='_T1_LPS_DLMUSE.nii.gz')
     
-    parser.add_argument('--t1_dir', required=True, type=str, default=None, help='Name of the input folder with T1 scans (OPTIONAL)')
-    parser.add_argument('--t1_suff', type=str, default='_T1.nii.gz', help='Suffix of the input T1 scans (OPTIONAL, DEFAULT: _T1.nii.gz)')
+    parser.add_argument('--out_dir', required=True, type=str)
+
+    parser.add_argument('-r', '--remove_intermediate', type=str, default='True')
+    parser.add_argument('-d', '--device', type=str, default="cuda")
     
-    parser.add_argument('--dlmuse_dir', required=True, type=str, default=None, help='Name of the input folder with DLMUSE masks (OPTIONAL)')
-    parser.add_argument('--dlmuse_suff', type=str, default='_T1_LPS_DLMUSE.nii.gz', help='Suffix of the input DLMUSE masks (OPTIONAL, DEFAULT: _T1_LPS_DLMUSE.nii.gz)')
-    parser.add_argument('-r', '--remove_intermediate', type=str, default='True', help="Remove all intermediate files (Default: True)")
-    parser.add_argument('-d', '--device', type=str, default="cuda", help="Device to run segmentation ('cuda' (GPU), 'cpu' (CPU) or 'mps' (Apple M-series chips supporting 3D CNN))")
+    # parser.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS)
     
-    parser.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS, help='Show this help message and exit.')
-    
-    parser.add_argument('-V', '--version', action='version', version=f'%(prog)s {VERSION}', help="Show program's version number and exit.")
+    parser.add_argument('-V', '--version', action='version', version=f'%(prog)s {VERSION}')
 
     args = parser.parse_args()
 
@@ -97,6 +123,8 @@ def main() -> None:
     output_directory = args.out_dir
     dlmuse_directory = args.dlmuse_dir
     dlmuse_suffix = args.dlmuse_suff
+    user_wmh_directory = args.wmh_dir
+    user_wmh_suffix = args.wmh_suff
     # Suffixes for intermediate files
     t1_lps_suffix = '_T1_LPS.nii.gz'
     fl_lps_suffix = '_FL_LPS.nii.gz'
@@ -148,14 +176,28 @@ def main() -> None:
             reorient_to_lps(input_path=os.path.join(fl_path, mrid + fl_image_suffix),
                             output_path=os.path.join(flair_lps_path, mrid + fl_lps_suffix))
         except Exception as e:
-            print(f"{mrid} excluded due to {e}")
+            logging.info(f"{mrid} T1 or FL LPS orientation failed. Log: {e}")
         
-    logging.info(f"Processing DLWMLS on FLAIR folder")
-    # Check if the folder exists
     
-    run_DLWMLS(in_dir=flair_lps_path, 
-               out_dir=dlwmls_path,
-               device=args.device)
+    if str(user_wmh_directory) == "":
+        logging.info(f"Processing DLWMLS on FLAIR folder")
+        run_DLWMLS(in_dir=flair_lps_path, 
+                out_dir=dlwmls_path,
+                device=args.device)
+    else:
+        # Check if directory with user wmh mask exists
+        if os.path.isdir(user_wmh_directory):
+            logging.info(f"Skipping DLWMLS...using user input WMH masks")
+            for mrid in mrids:
+                try:
+                # Reorient WMH mask
+                    reorient_to_lps(input_path=os.path.join(user_wmh_directory, mrid + user_wmh_suffix),
+                                    output_path=os.path.join(dlwmls_path, mrid + dlwmls_suffix))
+                except Exception as e:
+                    logging.info(f"{mrid} WMH mask LPS orientation failed. Log: {e}")
+        else:
+            logging.warning(f"Invalid user input WMH path")
+                
 
     
     logging.info(f"Creating transformation matrix from FL to T1, applying to the DLWMLS Masks")
