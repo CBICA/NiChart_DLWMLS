@@ -141,8 +141,8 @@ def main() -> None:
         logging.warning(f"Output folder '{output_directory}' not found. Creating '{output_directory}'")
         os.mkdir(output_directory)
     else:
-        shutil.rmtree(output_directory)
         logging.warning(f"Output folder '{output_directory}' found. Removing existing files and re-creating '{output_directory}'")
+        shutil.rmtree(output_directory)
         os.mkdir(output_directory)
 
     flair_lps_path = os.path.join(output_directory, 'FLAIR_LPS')
