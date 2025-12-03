@@ -30,7 +30,11 @@ setup(
 		"tqdm",
 		"nibabel",
 		"einops",
-		"segmentation-models-pytorch==0.3.2"
+		"segmentation-models-pytorch==0.3.2",
+        "NiChart_common_utils",
+        "nnunetv2==2.5.1",
+        "acvl_utils==0.2.5",
+        "blosc2==3.0.0b4",
     ],
     entry_points={"console_scripts": ["NiChart_DLWMLS = NiChart_DLWMLS.__main__:main"]},
     classifiers=[

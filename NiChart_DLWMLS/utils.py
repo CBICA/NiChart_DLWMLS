@@ -12,8 +12,56 @@ import SimpleITK as sitk
 import nibabel as nib
 # from nibabel.orientations import axcodes2ornt, ornt_transform
 
+from pathlib import Path
+
 os.environ['CURL_CA_BUNDLE'] = ''
 
+def fill_missing_paths(df: pd.DataFrame, required_columns, fill_fn):
+    """
+    Fill missing or absent path columns in the dataframe using a function of MRID.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Input dataframe. The first column is assumed to contain MRIDs.
+    required_columns : list[str]
+        Columns to ensure exist and are fully filled (e.g., ["T1_path", "FLAIR_path"]).
+    fill_fn : callable
+        Function with signature `fill_fn(mrid: str, column: str) -> str | None`
+        Returns the path to fill for a given MRID and column name, or None if not found.
+
+    Returns
+    -------
+    pd.DataFrame
+        Updated dataframe with all required columns filled.
+    """
+    
+    for col in required_columns:
+        if col not in df.columns:
+            print(f"[INFO] Missing column in list '{col}': creating it via fill function.")
+            df[col] = None
+    mrid_col = df.columns[0]
+    for idx, row in df.iterrows():
+        mrid = row[mrid_col]
+        for col in required_columns:
+            if pd.isna(row[col]) or not str(row[col]).strip():
+                filled_value = fill_fn(mrid, col)
+                if filled_value is not None:
+                    df.at[idx, col] = filled_value
+
+    missing_report = {
+        col: df[df[col].isna() | (df[col].astype(str).str.strip() == "")][mrid_col].tolist()
+        for col in required_columns
+    }
+
+    incomplete = {col: lst for col, lst in missing_report.items() if lst}
+    if incomplete:
+        msg_lines = ["[ERROR] Missing entries remain after filling:"]
+        for col, lst in incomplete.items():
+            msg_lines.append(f"  - {col}: {len(lst)} missing ( { ', '.join(list[:5]) + '...' if len(lst) > 5 else '' } )")
+        raise RuntimeError("\n".join(msg_lines))
+    print("All required path entries are filled.")
+    return df
 
 def reorient_to_lps(input_path: str, output_path: str):
     """
@@ -340,3 +388,13 @@ def segment_multilabel_mask_and_calculate_volumes(mask_a_path: str,
         df_csv.to_csv(csv_path,index=False)
 
     logging.info("\nProcess finished successfully.")
+
+def strip_filename(filename, suffix):
+    # Strip a common suffix first, then also strip any remaining .nii.gz file ext in case the suffix missed any.
+    strippable_exts = [".nii.gz"]
+    if filename.endswith(suffix):
+        filename = filename[: -len(suffix)]
+    for ext in strippable_exts:
+        if filename.endswith(ext):
+            filename = filename[: -len(ext)]
+    return filename
