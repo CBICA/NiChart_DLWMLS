@@ -188,10 +188,10 @@ def main() -> None:
             print(df_filled)
             df_filled.to_csv(os.path.join(output_directory, 'inferred_data_index.csv'), index=False)
             df_list = df_filled
-            mrids = df_list.iloc[:, 0].tolist()
+            mrids = [str(m) for m in df_list.iloc[:, 0].tolist()]
         else:
             df_list = pd.read_csv(args.list)
-            mrids = df_list.iloc[:, 0].tolist()
+            mrids = [str(m) for m in df_list.iloc[:, 0].tolist()]
     else: # default behavior for no provided list csv
         print("""
              No list csv was provided. Please provide a list csv with a single column header, MRID, with each row being an MRID to process.
