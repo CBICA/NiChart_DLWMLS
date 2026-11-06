@@ -58,7 +58,8 @@ def fill_missing_paths(df: pd.DataFrame, required_columns, fill_fn):
     if incomplete:
         msg_lines = ["[ERROR] Missing entries remain after filling:"]
         for col, lst in incomplete.items():
-            msg_lines.append(f"  - {col}: {len(lst)} missing ( { ', '.join(list[:5]) + '...' if len(lst) > 5 else '' } )")
+            shown = ', '.join(lst[:5]) + ('...' if len(lst) > 5 else '')
+            msg_lines.append(f"  - {col}: {len(lst)} missing ( {shown} )")
         raise RuntimeError("\n".join(msg_lines))
     print("All required path entries are filled.")
     return df

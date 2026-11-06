@@ -181,8 +181,46 @@ def main() -> None:
                 required.append('WMH')
             raw_and_derived_dirs = {'T1': t1_path, 'FLAIR': fl_path, 'DLMUSE': dlmuse_directory, 'WMH': user_wmh_directory}
             heuristic_df = nifti_parser.create_master_csv(raw_and_derived_dirs, os.path.join(output_directory, 'inferred_data_index_paths.csv'))
-            fill_fn = lambda mrid, req: os.path.basename(nifti_parser.get_path(mrid, req))
-             
+
+            # The subject list is the study's participants/demographics table, so
+            # it can legitimately name subjects we have no images for: imaging is
+            # uploaded separately from demographics, and often partially. Process
+            # the subjects that do have every required modality and report the
+            # rest, instead of aborting the whole run over rows that were never
+            # going to be processed.
+            mrid_col = df_list_original.columns[0]
+            usable = set(nifti_parser.filter_by_modalities(required)['mrids'])
+            keep = df_list_original[mrid_col].isin(usable)
+            if not keep.all():
+                skipped_rows = []
+                for mrid in df_list_original.loc[~keep, mrid_col].tolist():
+                    found = nifti_parser.get_paths(mrid, required)
+                    absent = sorted(str(m) for m, path in found.items() if not path)
+                    skipped_rows.append({'MRID': mrid, 'missing': ' '.join(absent)})
+                skipped_csv = os.path.join(output_directory, 'skipped_subjects.csv')
+                pd.DataFrame(skipped_rows).to_csv(skipped_csv, index=False)
+                print(f"[WARN] {len(skipped_rows)} of {len(df_list_original)} subject(s) in "
+                      f"{args.list} lack required imaging and will be skipped "
+                      f"(written to {skipped_csv}):")
+                for entry in skipped_rows[:10]:
+                    print(f"    {entry['MRID']}: missing {entry['missing'] or '(unknown)'}")
+                if len(skipped_rows) > 10:
+                    print(f"    ... and {len(skipped_rows) - 10} more")
+                df_list_original = df_list_original[keep].reset_index(drop=True)
+            if df_list_original.empty:
+                raise RuntimeError(
+                    f"None of the {len(usable)} subject(s) with imaging appear in "
+                    f"{args.list}, so there is nothing to process. Check that the "
+                    f"MRIDs in the subject list match the image filenames."
+                )
+
+            # get_path returns None for a known MRID that is missing one modality,
+            # and fill_missing_paths is documented to accept None from fill_fn, so
+            # don't hand that None to os.path.basename.
+            def fill_fn(mrid, req):
+                path = nifti_parser.get_path(mrid, req)
+                return os.path.basename(path) if path else None
+
             df_filled = fill_missing_paths(df_list_original, required, fill_fn)
             print("Final processed subject list:")
             print(df_filled)
