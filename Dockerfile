@@ -9,12 +9,21 @@ FROM pytorch/pytorch:${TORCH_VERSION}-cuda${CUDA_VERSION}-cudnn${CUDNN_VERSION}-
 RUN apt-get update && apt-get install -y --no-install-recommends git ca-certificates && rm -rf /var/lib/apt/lists/*
 
 RUN git clone https://github.com/CBICA/DLWMLS.git /DLWMLS
-RUN pip install -e /DLWMLS
+
+# Pin the entire resolved environment. This setup.py and DLWMLS's own pin a
+# handful of packages between them, so every other rebuild picks up whatever
+# the rest of the tree resolves to that day. That has already broken a build:
+# huggingface_hub 2.4.0 with httpx2 2.14.0 raises TypeError inside its own
+# response decoder. Regenerate with `pip freeze` in a working image, keeping
+# only the name==version lines and dropping DLWMLS and NiChart_DLWMLS
+# themselves, which are installed from source here.
+COPY constraints.txt /tmp/constraints.txt
+RUN pip install -c /tmp/constraints.txt -e /DLWMLS
 
 WORKDIR /app
 COPY . /app/ 
 
-RUN pip install -e .
+RUN pip install -c /tmp/constraints.txt -e .
 
 # Bake the nnU-Net weights into the image. dlwmls_pipeline.py downloads them
 # into this same directory at runtime whenever it finds them missing, which
